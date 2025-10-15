@@ -20,7 +20,7 @@ namespace JobTracker {
         public int SalaryExpectation;
 
         public int GetDaysSinceApplied() {
-            
+            return (DateTime.Now - ApplicationDate).Days;
         }
         public string GetSummary() {
             
