@@ -36,6 +36,9 @@ jobs:
         run: |
           branches=$(git branch -r | grep 'origin/' | grep -v 'origin/dev' | grep -v 'origin/main' | sed 's|origin/||')
 
+          git checkout dev
+          git pull origin dev
+
           for branch in $branches; do
             echo "Rebasing branch: $branch"
             git checkout $branch
