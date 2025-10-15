@@ -23,7 +23,7 @@ namespace JobTracker {
             return (DateTime.Now - ApplicationDate).Days;
         }
         public string GetSummary() {
-            
+            return "You applied to " + CompanyName + " on " + ApplicationDate + " for the position " + PositionTitle + " with the expected salary of " + SalaryExpectation + " and the current satus is " + Status;
         }
 
     }
