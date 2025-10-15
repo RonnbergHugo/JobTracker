@@ -19,6 +19,11 @@ namespace JobTracker {
         public DateTime? ResponseDate;
         public int SalaryExpectation;
 
+        public JobApplication() {
+            ApplicationDate = DateTime.Now;
+            Status = ApplicationStatus.Applied;
+        }
+
         public int GetDaysSinceApplied() {
             return (DateTime.Now - ApplicationDate).Days;
         }
