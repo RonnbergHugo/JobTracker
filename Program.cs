@@ -10,7 +10,7 @@
             job.SalaryExpectation = 50000;
             job.PositionTitle = "CEO";
 
-            Console.WriteLine(job.GetSummary() + "\n\n" + job.GetDaysSinceApplied());
+            Console.WriteLine(job.GetSummary() + "\n" + job.GetDaysSinceApplied());
         }
     }
 }
