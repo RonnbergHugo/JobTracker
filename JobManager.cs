@@ -8,7 +8,7 @@ using Spectre.Console;
 namespace JobTracker {
     internal class JobManager {
         List<JobApplication> jobApplications = new List<JobApplication>();
-        Dictionary<string, List<string>> companies = new Dictionary<string, List<string>>();
+        Dictionary<string, List<JobApplication>> companies = new Dictionary<string, List<JobApplication>>();
 
         public void AddJob() {
             string company;
@@ -50,10 +50,10 @@ namespace JobTracker {
             });
 
             if (companies.ContainsKey(company)) {
-                companies[company].Add(position);
+                companies[company].Add(jobApplications.Last());
             }
             else {
-                companies.Add(company, new List<string> { position });
+                companies.Add(company, new List<JobApplication> { jobApplications.Last() });
             }
             Console.WriteLine("Your application has been added.");
             Console.ReadKey();
@@ -71,7 +71,7 @@ namespace JobTracker {
                     .InstructionsText("[grey](Press [blue]<space>[/] to toggle a fruit, " + "[green]<enter>[/] to accept)[/]")
                     .UseConverter(item => string.IsNullOrEmpty(item.PositionTitle) ? $"[bold yellow]{item.CompanyName}[/]" : item.PositionTitle);
 
-                foreach (KeyValuePair<string, List<string>> c in companies) {
+                foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
                     JobApplication company = new JobApplication();
                     company.CompanyName = c.Key;
                     List<JobApplication> positions = jobApplications.Where(j => j.CompanyName == c.Key).Select(j => new JobApplication() { CompanyName = j.CompanyName, PositionTitle = j.PositionTitle }).ToList();
@@ -107,7 +107,14 @@ namespace JobTracker {
         }
 
         public void ShowAll() {
+            string output;
+            
+            Console.Clear();
 
+            foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
+                Console.WriteLine(c.Key);
+                c.Value.ForEach(c => Console.WriteLine(output = c.ResponseDate == null ? "    " + c.GetSummary() + ".": "    " + c.GetSummary() + " and they responded on " + c.ResponseDate + "."));
+            }
         }
 
         public void ShowByStatus() {

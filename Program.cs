@@ -8,7 +8,7 @@
             jobManager.AddJob();
             jobManager.AddJob();
             jobManager.AddJob();
-            jobManager.UpdateStatus();
+            jobManager.ShowAll();
         }
     }
 }
