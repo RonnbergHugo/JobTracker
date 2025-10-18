@@ -56,6 +56,7 @@ namespace JobTracker {
                 companies.Add(company, new List<string> { position });
             }
             Console.WriteLine("Your application has been added.");
+            Console.ReadKey();
         }
 
         public void UpdateStatus() {
