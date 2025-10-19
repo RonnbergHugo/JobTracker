@@ -7,7 +7,7 @@ using Spectre.Console;
 
 namespace JobTracker {
     internal class JobManager {
-        List<JobApplication> jobApplications = new List<JobApplication>();
+        public List<JobApplication> JobApplications = new List<JobApplication>();
         Dictionary<string, List<JobApplication>> companies = new Dictionary<string, List<JobApplication>>();
 
         public void AddJob() {
@@ -43,56 +43,56 @@ namespace JobTracker {
             }
             while (salary <= 0);
             
-            jobApplications.Add(new JobApplication() {
+            JobApplications.Add(new JobApplication() {
                 CompanyName = company,
                 PositionTitle = position,
                 SalaryExpectation = salary
             });
 
             if (companies.ContainsKey(company)) {
-                companies[company].Add(jobApplications.Last());
+                companies[company].Add(JobApplications.Last());
             }
             else {
-                companies.Add(company, new List<JobApplication> { jobApplications.Last() });
+                companies.Add(company, new List<JobApplication> { JobApplications.Last() });
             }
-            Console.WriteLine("Your application has been added.");
+            Console.WriteLine("Your application has been added.\nPress any key to continue...");
             Console.ReadKey();
         }
 
         public void UpdateStatus() {
-            MultiSelectionPrompt<JobApplication> prompt;
-            List<JobApplication> selectedPositions;
+            List<JobApplication> selectedJobApplications;
             do {
                 Console.Clear();
 
-                prompt = new MultiSelectionPrompt<JobApplication>()
+                MultiSelectionPrompt<JobApplication> prompt = new MultiSelectionPrompt<JobApplication>()
                     .Title("Which job application status would you like to update?")
-                    .PageSize(jobApplications.Count > 2 ? jobApplications.Count : 3)
+                    .PageSize(JobApplications.Count > 2 ? JobApplications.Count : 3)
                     .InstructionsText("[grey](Press [blue]<space>[/] to toggle and [green]<enter>[/] to accept)[/]")
                     .UseConverter(item => string.IsNullOrEmpty(item.PositionTitle) ? $"[bold yellow]{item.CompanyName}[/]" : item.PositionTitle);
 
                 foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
                     JobApplication company = new JobApplication();
                     company.CompanyName = c.Key;
-                    prompt.AddChoiceGroup(company, jobApplications.Where(j => j.CompanyName == c.Key).ToList());
+                    prompt.AddChoiceGroup(company, JobApplications.Where(j => j.CompanyName == c.Key).ToList());
                 }
 
-                selectedPositions = AnsiConsole.Prompt(prompt);
+                selectedJobApplications = AnsiConsole.Prompt(prompt);
                 Console.WriteLine("You have selected:");
-                selectedPositions.ForEach(j => Console.WriteLine(j.PositionTitle + " at " + j.CompanyName));
+                selectedJobApplications.ForEach(j => Console.WriteLine(j.PositionTitle + " at " + j.CompanyName));
                 Console.WriteLine("Continue? y/n");
             }
             while (string.Equals("n", Console.ReadLine(), StringComparison.OrdinalIgnoreCase));
 
             Console.Clear();
 
-            jobApplications.ForEach(j => j.Status = selectedPositions.Contains(j) ? AnsiConsole.Prompt(
+            JobApplications.ForEach(j => j.Status = selectedJobApplications.Contains(j) ? AnsiConsole.Prompt(
                     new SelectionPrompt<ApplicationStatus>()
                         .Title("To what would you like to update the status of " + j.PositionTitle + " at " + j.CompanyName + "? The current status is " + j.Status)
                         .PageSize(4)
                         .AddChoices(Enum.GetValues<ApplicationStatus>())) : j.Status);
 
-            jobApplications.ForEach(j => Console.Write(selectedPositions.Contains(j) ? "You changed the status of " + j.PositionTitle + " at " + j.CompanyName + " to " + j.Status + "\n" : ""));
+            JobApplications.ForEach(j => Console.Write(selectedJobApplications.Contains(j) ? "You changed the status of " + j.PositionTitle + " at " + j.CompanyName + " to " + j.Status + "\n" : ""));
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
 
@@ -101,8 +101,9 @@ namespace JobTracker {
 
             foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
                 Console.WriteLine(c.Key);
-                c.Value.ForEach(c => Console.WriteLine(c.ResponseDate == null ? "    " + c.GetSummary() + "." : "    " + c.GetSummary() + " and they responded on " + c.ResponseDate + "."));
+                c.Value.ForEach(j => Console.WriteLine(j.ResponseDate == null ? "    " + j.GetSummary() + "." : "    " + j.GetSummary() + " and they responded on " + j.ResponseDate + "."));
             }
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
 
@@ -118,10 +119,11 @@ namespace JobTracker {
 
             foreach (KeyValuePair<string, List<JobApplication>> c in companies.Where(p => p.Value.Any(j => selection.Contains(j.Status)))) {
                 Console.WriteLine(c.Key);
-                foreach (JobApplication p in c.Value.Where(j => selection.Contains(j.Status))) {
-                    Console.WriteLine(p.ResponseDate == null ? "    " + p.GetSummary() + "." : "    " + p.GetSummary() + " and they responded on " + p.ResponseDate + ".");
+                foreach (JobApplication j in c.Value.Where(j => selection.Contains(j.Status))) {
+                    Console.WriteLine(j.ResponseDate == null ? "    " + j.GetSummary() + "." : "    " + j.GetSummary() + " and they responded on " + j.ResponseDate + ".");
                 }
             }
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
 
@@ -139,33 +141,34 @@ namespace JobTracker {
 
             switch ((choice.Item1, choice.Item2)) {
                 case ("Amount by status", _):
-                    Console.WriteLine(jobApplications.Any() ? "Applied: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[0]).Count() : "There are no job applications.");
-                    Console.WriteLine(jobApplications.Any() ? "Interview: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[1]).Count() : "There are no job applications.");
-                    Console.WriteLine(jobApplications.Any() ? "Offer: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[2]).Count() : "There are no job applications.");
-                    Console.WriteLine(jobApplications.Any() ? "Rejected: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[3]).Count() : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? "Applied: " + JobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[0]).Count() : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? "Interview: " + JobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[1]).Count() : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? "Offer: " + JobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[2]).Count() : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? "Rejected: " + JobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[3]).Count() : "There are no job applications.");
                     break;
                 case ("Average response time", _):
-                    Console.WriteLine(jobApplications.Any() ? jobApplications.Where(j => j.ResponseDate != null).Any() ? jobApplications.Where(j => j.ResponseDate != null).Average(j => (j.ResponseDate.Value - j.ApplicationDate).Days) : "There are no applications with responses." : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? JobApplications.Where(j => j.ResponseDate != null).Any() ? JobApplications.Where(j => j.ResponseDate != null).Average(j => (j.ResponseDate.Value - j.ApplicationDate).Days) : "There are no applications with responses." : "There are no job applications.");
                     break;
                 case ("Ascending", "0"):
-                    Console.WriteLine(jobApplications.Any() ? string.Join("\n", jobApplications.OrderBy(j => j.ApplicationDate).Select(j => j.GetSummary())) : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? string.Join("\n", JobApplications.OrderBy(j => j.ApplicationDate).Select(j => j.GetSummary())) : "There are no job applications.");
                     break;
                 case ("Descending", "0"):
-                    Console.WriteLine(jobApplications.Any() ? string.Join("\n", jobApplications.OrderByDescending(j => j.ApplicationDate).Select(j => j.GetSummary())) : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? string.Join("\n", JobApplications.OrderByDescending(j => j.ApplicationDate).Select(j => j.GetSummary())) : "There are no job applications.");
                     break;
                 case ("Ascending", "1"):
-                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate != null) ? string.Join("\n", jobApplications.OrderBy(j => j.ResponseDate).Select(j => j.GetSummary())) : "There are no applications with responses." : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? JobApplications.Any(j => j.ResponseDate != null) ? string.Join("\n", JobApplications.OrderBy(j => j.ResponseDate).Select(j => j.GetSummary())) : "There are no applications with responses." : "There are no job applications.");
                     break;
                 case ("Descending", "1"):
-                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate != null) ? string.Join("\n", jobApplications.OrderByDescending(j => j.ResponseDate).Select(j => j.GetSummary())) : "There are no applications with responses." : "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? JobApplications.Any(j => j.ResponseDate != null) ? string.Join("\n", JobApplications.OrderByDescending(j => j.ResponseDate).Select(j => j.GetSummary())) : "There are no applications with responses." : "There are no job applications.");
                     break;
                 default:
                     int days = AnsiConsole.Prompt(
                         new TextPrompt<int>("No response in: ")
                             .DefaultValue(14));
-                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate == null) ? jobApplications.Any(j => j.GetDaysSinceApplied() > days) ? string.Join("\n", jobApplications.Where(j => j.GetDaysSinceApplied() > days && j.ResponseDate == null).Select(j => j.GetSummary())) : "There are no applications without responses older than " + days + " days." : "There are only applications with responses.\n": "There are no job applications.");
+                    Console.WriteLine(JobApplications.Any() ? JobApplications.Any(j => j.ResponseDate == null) ? JobApplications.Any(j => j.GetDaysSinceApplied() > days) ? string.Join("\n", JobApplications.Where(j => j.GetDaysSinceApplied() > days && j.ResponseDate == null).Select(j => j.GetSummary())) : "There are no applications without responses older than " + days + " days." : "There are only applications with responses.\n": "There are no job applications.");
                     break;
             }
+            Console.WriteLine("Press any key to continue...");
             Console.ReadKey();
         }
     }

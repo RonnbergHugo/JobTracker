@@ -30,6 +30,5 @@ namespace JobTracker {
         public string GetSummary() {
             return "You applied to " + CompanyName + " on " + ApplicationDate + ", " + GetDaysSinceApplied() + " days ago, for the position of " + PositionTitle + " with the expected salary of " + SalaryExpectation + " and the current satus is " + Status;
         }
-
     }
 }
