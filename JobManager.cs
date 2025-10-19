@@ -67,35 +67,32 @@ namespace JobTracker {
 
                 prompt = new MultiSelectionPrompt<JobApplication>()
                     .Title("Which job application status would you like to update?")
-                    .PageSize(jobApplications.Count)
+                    .PageSize(jobApplications.Count > 2 ? jobApplications.Count : 3)
                     .InstructionsText("[grey](Press [blue]<space>[/] to toggle and [green]<enter>[/] to accept)[/]")
                     .UseConverter(item => string.IsNullOrEmpty(item.PositionTitle) ? $"[bold yellow]{item.CompanyName}[/]" : item.PositionTitle);
 
                 foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
                     JobApplication company = new JobApplication();
                     company.CompanyName = c.Key;
-                    List<JobApplication> positions = jobApplications.Where(j => j.CompanyName == c.Key).Select(j => new JobApplication() { CompanyName = j.CompanyName, PositionTitle = j.PositionTitle }).ToList();
-                    prompt.AddChoiceGroup(company, positions);
+                    prompt.AddChoiceGroup(company, jobApplications.Where(j => j.CompanyName == c.Key).ToList());
                 }
 
                 selectedPositions = AnsiConsole.Prompt(prompt);
                 Console.WriteLine("You have selected:");
-                foreach (JobApplication j in selectedPositions) {
-                    Console.WriteLine(j.PositionTitle + " at " + j.CompanyName);
-                }
+                selectedPositions.ForEach(j => Console.WriteLine(j.PositionTitle + " at " + j.CompanyName));
                 Console.WriteLine("Continue? y/n");
             }
             while (string.Equals("n", Console.ReadLine(), StringComparison.OrdinalIgnoreCase));
 
             Console.Clear();
 
-            jobApplications.ForEach(j => selectedPositions.ForEach(s => j.Status = j.PositionTitle == s.PositionTitle && j.CompanyName == s.CompanyName ? AnsiConsole.Prompt(
+            jobApplications.ForEach(j => j.Status = selectedPositions.Contains(j) ? AnsiConsole.Prompt(
                     new SelectionPrompt<ApplicationStatus>()
                         .Title("To what would you like to update the status of " + j.PositionTitle + " at " + j.CompanyName + "? The current status is " + j.Status)
                         .PageSize(4)
-                        .AddChoices(Enum.GetValues<ApplicationStatus>())) : j.Status));
+                        .AddChoices(Enum.GetValues<ApplicationStatus>())) : j.Status);
 
-            jobApplications.ForEach(j => selectedPositions.ForEach(s => Console.Write(j.PositionTitle == s.PositionTitle && j.CompanyName == s.CompanyName ? "You changed the status of " + j.PositionTitle + " at " + j.CompanyName + " to " + j.Status + "\n" : "")));
+            jobApplications.ForEach(j => Console.Write(selectedPositions.Contains(j) ? "You changed the status of " + j.PositionTitle + " at " + j.CompanyName + " to " + j.Status + "\n" : ""));
             Console.ReadKey();
         }
 
@@ -106,6 +103,7 @@ namespace JobTracker {
                 Console.WriteLine(c.Key);
                 c.Value.ForEach(c => Console.WriteLine(c.ResponseDate == null ? "    " + c.GetSummary() + "." : "    " + c.GetSummary() + " and they responded on " + c.ResponseDate + "."));
             }
+            Console.ReadKey();
         }
 
         public void ShowByStatus() {
@@ -133,7 +131,7 @@ namespace JobTracker {
             (string, string) choice = AnsiConsole.Prompt(
             new SelectionPrompt<(string, string)>()
                 .Title("Which statistic would you like to show?")
-                .PageSize(5)
+                .PageSize(7)
                 .UseConverter(item => item.Item1)
                 .AddChoices(new List<(string, string)>() { ("Amount by status", ""), ("Average response time", ""), ("No response in: [italic]Days[/]", "") })
                 .AddChoiceGroup(("Order by application date", ""), new List<(string, string)>() { ("Ascending", "0"), ("Descending", "0") })
@@ -165,9 +163,10 @@ namespace JobTracker {
                     int days = AnsiConsole.Prompt(
                         new TextPrompt<int>("No response in: ")
                             .DefaultValue(14));
-                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate != null) ? jobApplications.Any(j => j.GetDaysSinceApplied() > days) ? string.Join("\n", jobApplications.Select(j => j.GetSummary())) : "There are no applications older than " + days + " days." : "There are no applications with responses." : "There are no job applications.");
+                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate == null) ? jobApplications.Any(j => j.GetDaysSinceApplied() > days) ? string.Join("\n", jobApplications.Where(j => j.GetDaysSinceApplied() > days && j.ResponseDate == null).Select(j => j.GetSummary())) : "There are no applications without responses older than " + days + " days." : "There are only applications with responses.\n": "There are no job applications.");
                     break;
             }
+            Console.ReadKey();
         }
     }
 }
