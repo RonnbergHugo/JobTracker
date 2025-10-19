@@ -66,9 +66,9 @@ namespace JobTracker {
                 Console.Clear();
 
                 prompt = new MultiSelectionPrompt<JobApplication>()
-                    .Title("Which job application status would you like to update??")
+                    .Title("Which job application status would you like to update?")
                     .PageSize(jobApplications.Count)
-                    .InstructionsText("[grey](Press [blue]<space>[/] to toggle a fruit, " + "[green]<enter>[/] to accept)[/]")
+                    .InstructionsText("[grey](Press [blue]<space>[/] to toggle and [green]<enter>[/] to accept)[/]")
                     .UseConverter(item => string.IsNullOrEmpty(item.PositionTitle) ? $"[bold yellow]{item.CompanyName}[/]" : item.PositionTitle);
 
                 foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
@@ -89,36 +89,42 @@ namespace JobTracker {
 
             Console.Clear();
 
-            foreach (JobApplication j in selectedPositions) {
-                j.Status = AnsiConsole.Prompt(
-                                            new SelectionPrompt<ApplicationStatus>()
-                                                .Title("To what would you like to update the status of " + j.PositionTitle + " at " + j.CompanyName + "? The current status is " + j.Status)
-                                                .PageSize(4)
-                                                .AddChoices(Enum.GetValues<ApplicationStatus>()));
-                Console.Clear();
-            }
+            jobApplications.ForEach(j => selectedPositions.ForEach(s => j.Status = j.PositionTitle == s.PositionTitle && j.CompanyName == s.CompanyName ? AnsiConsole.Prompt(
+                    new SelectionPrompt<ApplicationStatus>()
+                        .Title("To what would you like to update the status of " + j.PositionTitle + " at " + j.CompanyName + "? The current status is " + j.Status)
+                        .PageSize(4)
+                        .AddChoices(Enum.GetValues<ApplicationStatus>())) : j.Status));
 
-            Console.Clear();
-
-            foreach (JobApplication j in selectedPositions) {
-                Console.WriteLine("You changed the status of " + j.PositionTitle + " at " + j.CompanyName + " to " + j.Status);
-            }
+            jobApplications.ForEach(j => selectedPositions.ForEach(s => Console.Write(j.PositionTitle == s.PositionTitle && j.CompanyName == s.CompanyName ? "You changed the status of " + j.PositionTitle + " at " + j.CompanyName + " to " + j.Status + "\n" : "")));
             Console.ReadKey();
         }
 
         public void ShowAll() {
-            string output;
-            
             Console.Clear();
 
             foreach (KeyValuePair<string, List<JobApplication>> c in companies) {
                 Console.WriteLine(c.Key);
-                c.Value.ForEach(c => Console.WriteLine(output = c.ResponseDate == null ? "    " + c.GetSummary() + ".": "    " + c.GetSummary() + " and they responded on " + c.ResponseDate + "."));
+                c.Value.ForEach(c => Console.WriteLine(c.ResponseDate == null ? "    " + c.GetSummary() + "." : "    " + c.GetSummary() + " and they responded on " + c.ResponseDate + "."));
             }
         }
 
         public void ShowByStatus() {
+            Console.Clear();
 
+            List<ApplicationStatus> selection = AnsiConsole.Prompt(
+                new MultiSelectionPrompt<ApplicationStatus>()
+                    .Title("Which status would you like to show?")
+                    .PageSize(4)
+                    .InstructionsText("[grey](Press [blue]<space>[/] to toggle and [green]<enter>[/] to accept)[/]")
+                    .AddChoices(Enum.GetValues<ApplicationStatus>()));
+
+            foreach (KeyValuePair<string, List<JobApplication>> c in companies.Where(p => p.Value.Any(j => selection.Contains(j.Status)))) {
+                Console.WriteLine(c.Key);
+                foreach (JobApplication p in c.Value.Where(j => selection.Contains(j.Status))) {
+                    Console.WriteLine(p.ResponseDate == null ? "    " + p.GetSummary() + "." : "    " + p.GetSummary() + " and they responded on " + p.ResponseDate + ".");
+                }
+            }
+            Console.ReadKey();
         }
 
         public void ShowStatistics() {
