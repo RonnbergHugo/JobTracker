@@ -9,17 +9,16 @@ namespace JobTracker
             JobManager jobManager = new JobManager();
             bool exit = false;
 
-            jobManager.JobApplications.Add(new JobApplication
-            {
+            jobManager.AddJob(new JobApplication {
                 CompanyName = "Volvo Cars",
-                PositionTitle = "Systemutvecklare",
+                PositionTitle = "System Developer",
                 Status = ApplicationStatus.Applied,
                 ApplicationDate = DateTime.Now.AddDays(-15),
                 SalaryExpectation = 45000,
                 ResponseDate = null
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
+            jobManager.AddJob(new JobApplication {
                 CompanyName = "Spotify",
                 PositionTitle = "Backend Developer",
                 Status = ApplicationStatus.Interview,
@@ -28,16 +27,16 @@ namespace JobTracker
                 ResponseDate = DateTime.Now.AddDays(-3)
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
+            jobManager.AddJob(new JobApplication {
                 CompanyName = "Ericsson",
-                PositionTitle = "Testare",
+                PositionTitle = "Tester",
                 Status = ApplicationStatus.Rejected,
                 ApplicationDate = DateTime.Now.AddDays(-25),
                 SalaryExpectation = 40000,
                 ResponseDate = DateTime.Now.AddDays(-5)
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
+            jobManager.AddJob(new JobApplication {
                 CompanyName = "IKEA IT",
                 PositionTitle = "Frontend Developer",
                 Status = ApplicationStatus.Offer,
@@ -46,16 +45,16 @@ namespace JobTracker
                 ResponseDate = DateTime.Now.AddDays(-1)
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
-                CompanyName = "Saab AB",
-                PositionTitle = "C# Utvecklare",
-                Status = ApplicationStatus.Applied,
-                ApplicationDate = DateTime.Now.AddDays(-30),
-                SalaryExpectation = 46000,
+            jobManager.AddJob(new JobApplication {
+                CompanyName = "Volvo Cars",
+                PositionTitle = "Backend Developer",
+                Status = ApplicationStatus.Interview,
+                ApplicationDate = DateTime.Now.AddDays(-6),
+                SalaryExpectation = 53000,
                 ResponseDate = null
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
+            jobManager.AddJob(new JobApplication {
                 CompanyName = "Klarna",
                 PositionTitle = "Fullstack Developer",
                 Status = ApplicationStatus.Interview,
@@ -64,16 +63,16 @@ namespace JobTracker
                 ResponseDate = null
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
-                CompanyName = "Tietoevry",
-                PositionTitle = "Systemanalytiker",
+            jobManager.AddJob(new JobApplication {
+                CompanyName = "Spotify",
+                PositionTitle = "Frontend Developer",
                 Status = ApplicationStatus.Applied,
-                ApplicationDate = DateTime.Now.AddDays(-20),
-                SalaryExpectation = 47000,
+                ApplicationDate = DateTime.Now.AddDays(-4),
+                SalaryExpectation = 50000,
                 ResponseDate = null
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
+            jobManager.AddJob(new JobApplication {
                 CompanyName = "Northvolt",
                 PositionTitle = "Automation Engineer",
                 Status = ApplicationStatus.Rejected,
@@ -82,8 +81,8 @@ namespace JobTracker
                 ResponseDate = DateTime.Now.AddDays(-2)
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
-                CompanyName = "Microsoft Sverige",
+            jobManager.AddJob(new JobApplication {
+                CompanyName = "Microsoft Sweden",
                 PositionTitle = "Cloud Architect",
                 Status = ApplicationStatus.Offer,
                 ApplicationDate = DateTime.Now.AddDays(-9),
@@ -91,9 +90,9 @@ namespace JobTracker
                 ResponseDate = DateTime.Now.AddDays(-1)
             });
 
-            jobManager.JobApplications.Add(new JobApplication {
-                CompanyName = "Göteborgs Stad IT",
-                PositionTitle = "IT-tekniker",
+            jobManager.AddJob(new JobApplication {
+                CompanyName = "Göteborg IT Services",
+                PositionTitle = "IT Technician",
                 Status = ApplicationStatus.Applied,
                 ApplicationDate = DateTime.Now.AddDays(-5),
                 SalaryExpectation = 39000,
@@ -109,31 +108,35 @@ namespace JobTracker
                         .PageSize(10)
                         .AddChoices(new[]
                         {
-                    "1. Add a job application",
-                    "2. Update application status",
-                    "3. Show all applications",
-                    "4. Show applications by status",
-                    "5. Show statistics",
-                    "6. Exit"
+                    "Add a job application",
+                    "Update application status",
+                    "Show all applications",
+                    "Show applications by status",
+                    "Show statistics",
+                    "Remove application",
+                    "Exit"
                         }));
 
                 switch (choice) {
-                    case "1. Add a job application":
+                    case "Add a job application":
                         jobManager.AddJob();
                         break;
-                    case "2. Update application status":
+                    case "Update application status":
                         jobManager.UpdateStatus();
                         break;
-                    case "3. Show all applications":
+                    case "Show all applications":
                         jobManager.ShowAll();
                         break;
-                    case "4. Show applications by status":
+                    case "Show applications by status":
                         jobManager.ShowByStatus();
                         break;
-                    case "5. Show statistics":
+                    case "Show statistics":
                         jobManager.ShowStatistics();
                         break;
-                    case "6. Exit":
+                    case "Remove application":
+                        jobManager.RemoveJobApplication();
+                        break;
+                    case "Exit":
                         exit = true;
                         AnsiConsole.MarkupLine("[green]Goodbye![/]");
                         break;

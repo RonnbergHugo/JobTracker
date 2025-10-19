@@ -28,7 +28,18 @@ namespace JobTracker {
             return (DateTime.Now - ApplicationDate).Days;
         }
         public string GetSummary() {
-            return "You applied to " + CompanyName + " on " + ApplicationDate + ", " + GetDaysSinceApplied() + " days ago, for the position of " + PositionTitle + " with the expected salary of " + SalaryExpectation + " and the current satus is " + Status;
+            return "You applied to " + CompanyName + " on " + ApplicationDate + ", " + GetDaysSinceApplied() + " days ago, for the position of " + PositionTitle + " with the expected salary of " + SalaryExpectation + " and the current satus is " + GetColoredStatus();
+        }
+
+        public string GetColoredStatus() {
+            string statusText = Status.ToString();
+            return Status switch {
+                ApplicationStatus.Applied => $"[blue]{statusText}[/]",
+                ApplicationStatus.Interview => $"[yellow]{statusText}[/]",
+                ApplicationStatus.Offer => $"[green]{statusText}[/]",
+                ApplicationStatus.Rejected => $"[red]{statusText}[/]",
+                _ => statusText
+            };
         }
     }
 }
