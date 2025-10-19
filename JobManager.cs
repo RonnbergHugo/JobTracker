@@ -128,7 +128,46 @@ namespace JobTracker {
         }
 
         public void ShowStatistics() {
+            Console.Clear();
 
+            (string, string) choice = AnsiConsole.Prompt(
+            new SelectionPrompt<(string, string)>()
+                .Title("Which statistic would you like to show?")
+                .PageSize(5)
+                .UseConverter(item => item.Item1)
+                .AddChoices(new List<(string, string)>() { ("Amount by status", ""), ("Average response time", ""), ("No response in: [italic]Days[/]", "") })
+                .AddChoiceGroup(("Order by application date", ""), new List<(string, string)>() { ("Ascending", "0"), ("Descending", "0") })
+                .AddChoiceGroup(("Order by response date", ""), new List<(string, string)>() { ("Ascending", "1"), ("Descending", "1") }));
+
+            switch ((choice.Item1, choice.Item2)) {
+                case ("Amount by status", _):
+                    Console.WriteLine(jobApplications.Any() ? "Applied: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[0]).Count() : "There are no job applications.");
+                    Console.WriteLine(jobApplications.Any() ? "Interview: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[1]).Count() : "There are no job applications.");
+                    Console.WriteLine(jobApplications.Any() ? "Offer: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[2]).Count() : "There are no job applications.");
+                    Console.WriteLine(jobApplications.Any() ? "Rejected: " + jobApplications.Where(j => j.Status == Enum.GetValues<ApplicationStatus>()[3]).Count() : "There are no job applications.");
+                    break;
+                case ("Average response time", _):
+                    Console.WriteLine(jobApplications.Any() ? jobApplications.Where(j => j.ResponseDate != null).Any() ? jobApplications.Where(j => j.ResponseDate != null).Average(j => (j.ResponseDate.Value - j.ApplicationDate).Days) : "There are no applications with responses." : "There are no job applications.");
+                    break;
+                case ("Ascending", "0"):
+                    Console.WriteLine(jobApplications.Any() ? string.Join("\n", jobApplications.OrderBy(j => j.ApplicationDate).Select(j => j.GetSummary())) : "There are no job applications.");
+                    break;
+                case ("Descending", "0"):
+                    Console.WriteLine(jobApplications.Any() ? string.Join("\n", jobApplications.OrderByDescending(j => j.ApplicationDate).Select(j => j.GetSummary())) : "There are no job applications.");
+                    break;
+                case ("Ascending", "1"):
+                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate != null) ? string.Join("\n", jobApplications.OrderBy(j => j.ResponseDate).Select(j => j.GetSummary())) : "There are no applications with responses." : "There are no job applications.");
+                    break;
+                case ("Descending", "1"):
+                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate != null) ? string.Join("\n", jobApplications.OrderByDescending(j => j.ResponseDate).Select(j => j.GetSummary())) : "There are no applications with responses." : "There are no job applications.");
+                    break;
+                default:
+                    int days = AnsiConsole.Prompt(
+                        new TextPrompt<int>("No response in: ")
+                            .DefaultValue(14));
+                    Console.WriteLine(jobApplications.Any() ? jobApplications.Any(j => j.ResponseDate != null) ? jobApplications.Any(j => j.GetDaysSinceApplied() > days) ? string.Join("\n", jobApplications.Select(j => j.GetSummary())) : "There are no applications older than " + days + " days." : "There are no applications with responses." : "There are no job applications.");
+                    break;
+            }
         }
     }
 }
